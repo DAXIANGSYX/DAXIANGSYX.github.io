@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>2D地图视图入门 | ArcGIS JavaScript API 示例</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        header {
+            background-color: #4a69bd;
+            color: white;
+            padding: 10px 20px;
+            text-align: left;
+            width: 100%;
+            font-size: 12px;
+        }
+        .action-button {
+            margin-right: 10px;
+            background-color: #4a69bd;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .action-button:hover {
+            background-color: #365899;
+        }
+        #toolbarDiv {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <header>宋宇翔 的 WebGIS 应用</header>
+    <div id="viewDiv"></div>
+    <div id="toolbarDiv">
+        <button class="action-button" id="distanceButton" title="Measure distance">测量距离</button>
+        <button class="action-button" id="areaButton" title="Measure area">测量面积</button>
+        <button class="action-button" id="printButton" title="Print Map">打印地图</button>
+    </div>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/ScaleBar",
+            "esri/widgets/Legend",
+            "esri/widgets/Search",
+            "esri/widgets/LayerList",
+            "esri/widgets/BasemapGallery",
+            "esri/widgets/DistanceMeasurement2D",
+            "esri/widgets/AreaMeasurement2D",
+            "esri/widgets/Expand",
+            "esri/widgets/Editor",
+            "esri/widgets/Print",
+            "esri/config"
+        ], function(Map, MapView, FeatureLayer, ScaleBar, Legend, Search, LayerList, BasemapGallery,
+                    DistanceMeasurement2D, AreaMeasurement2D, Expand, Editor, Print, esriConfig) {
+            const map = new Map({
+                basemap: "topo-vector"
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 4,
+                center: [116, 39]
+            });
+            const layer = new FeatureLayer({
+                url: "https://www.geosceneonline.cn/server/rest/services/Hosted/全国各省人口出生率/FeatureServer"
+            });
+            map.add(layer);
+            const print = new Print({
+                view: view,
+                printServiceUrl: "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+            });
+
+            document.getElementById("printButton").onclick = function() {
+                view.ui.add(print, "top-right");
+            };
+
+            const scaleBar = new ScaleBar({
+                view: view
+            });
+            view.ui.add(scaleBar, "bottom-left");
+
+            const legend = new Legend({
+                view: view
+            });
+            view.ui.add(legend, "bottom-right");
+
+            const searchWidget = new Search({
+                view: view
+            });
+            view.ui.add(searchWidget, "top-right");
+
+            const layerList = new LayerList({
+                view: view
+            });
+            view.ui.add(layerList, "top-left");
+
+            const basemapGallery = new BasemapGallery({
+                view: view
+            });
+            view.ui.add(basemapGallery, "top-right");
+
+            const distanceMeasurement = new DistanceMeasurement2D({
+                view: view,
+                container: document.createElement("div")
+            });
+
+            const areaMeasurement = new AreaMeasurement2D({
+                view: view,
+                container: document.createElement("div")
+            });
+
+            document.getElementById("distanceButton").onclick = function() {
+                view.ui.add(distanceMeasurement);
+                distanceMeasurement.active = true;
+                areaMeasurement.active = false;
+            };
+
+            document.getElementById("areaButton").onclick = function() {
+                view.ui.add(areaMeasurement);
+                areaMeasurement.active = true;
+                distanceMeasurement.active = false;
+            };
+        });
+    </script>
+</body>
+</html>
